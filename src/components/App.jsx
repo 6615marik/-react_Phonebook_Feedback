@@ -5,13 +5,20 @@ import { FeedbackOptions } from './FeedbackOptions/FeedbackOptions';
 import { Noification } from './Notify/Notification';
 import { Form } from 'Form/Form';
 import { Contacts } from 'Form/Contacts';
+import { Filtr } from 'Form/Filtr';
 // import Notiflix from 'notiflix';
 export class App extends Component {
   state = {
     good: 0,
     neutral: 0,
     bad: 0,
-    contacts: [],
+    contacts: [
+      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+    ],
+    filtr: '',
   };
   onIncrement = e => {
     const { name } = e.target;
@@ -27,9 +34,34 @@ export class App extends Component {
 
   onFormData = data => {
     console.log(data);
+    const { contacts } = this.state;
+    if (contacts.find(contact => contact.name === data.name)) {
+      alert(`${data.name} is already in contacts`);
+      return;
+    }
+    this.setState(({ contacts }) => {
+      return { contacts: [...contacts, data] };
+    });
+    console.log(this.state);
   };
+
+  onFiltrData = e => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+  };
+  onFilterContacts = () => {
+    const { contacts, filtr } = this.state;
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filtr.toLowerCase())
+    );
+  };
+  onRemoveContact = id =>
+    this.setState(({ contacts }) => ({
+      contacts: contacts.filter(contact => contact.id !== id),
+    }));
+
   render() {
-    const { good, bad, neutral, contacts } = this.state;
+    const { good, bad, neutral, filtr, contacts } = this.state;
     let total = this.countTotalFeedback();
     return (
       <>
@@ -51,7 +83,11 @@ export class App extends Component {
           )}
         </Section>
         <Form onSubmit={this.onFormData} />
-        <Contacts contacts={contacts} />
+        <Filtr filtr={filtr} onFiltr={this.onFiltrData} />
+        <Contacts
+          onRemove={this.onRemoveContact}
+          contacts={this.onFilterContacts(filtr, contacts)}
+        />
       </>
     );
   }
