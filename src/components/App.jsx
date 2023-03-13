@@ -20,6 +20,27 @@ export class App extends Component {
     ],
     filtr: '',
   };
+
+  componentDidMount() {
+    try {
+      const local = localStorage.getItem('contactLS');
+      const contacts = JSON.parse(local);
+
+      if (contacts) {
+        this.setState({ contacts: contacts });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  componentDidUpdate(prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      const contjson = JSON.stringify(this.state.contacts);
+      localStorage.setItem('contactsLS', contjson);
+    }
+  }
+
   onIncrement = e => {
     const { name } = e.target;
     this.setState(prevstate => ({ [name]: prevstate[name] + 1 }));
@@ -42,7 +63,6 @@ export class App extends Component {
     this.setState(({ contacts }) => {
       return { contacts: [...contacts, data] };
     });
-    console.log(this.state);
   };
 
   onFiltrData = e => {
@@ -63,6 +83,8 @@ export class App extends Component {
   render() {
     const { good, bad, neutral, filtr, contacts } = this.state;
     let total = this.countTotalFeedback();
+
+    console.log(this.state);
     return (
       <>
         <Section title="Please leave feedback">
